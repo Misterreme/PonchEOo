@@ -1,153 +1,62 @@
-import { useEffect, useState } from 'react';
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
-import api from '../api/client';
+import { useState } from 'react';
+import { mockPayroll } from '../data/mockData';
 
 export default function PayrollPage() {
-  const [summaries, setSummaries] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [generating, setGenerating] = useState(false);
-  const [exportingCsv, setExportingCsv] = useState(false);
-  const [exportingPdf, setExportingPdf] = useState(false);
-  const [periodStart, setPeriodStart] = useState('');
-  const [periodEnd, setPeriodEnd] = useState('');
-  const [periodType, setPeriodType] = useState<'WEEKLY' | 'BIWEEKLY'>('WEEKLY');
+  const [summaries] = useState(mockPayroll);
 
-  const getQueryFilters = () => ({
-    ...(periodStart ? { periodStart } : {}),
-    ...(periodEnd ? { periodEnd } : {}),
-  });
+  const formatMoney = (val: number) => `RD$${Number(val).toFixed(2)}`;
 
-  const fetchPayroll = async () => {
-    try {
-      const { data } = await api.get('/payroll', { params: getQueryFilters() });
-      setSummaries(data.data);
-    } catch (err) {
-      console.error('Failed to load payroll:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  return (
+    <div>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Nómina</h1>
+      </div>
 
-  useEffect(() => {
-    fetchPayroll();
-  }, []);
+      <div className="overflow-x-auto">
+        <table className="table table-zebra">
+          <thead>
+            <tr>
+              <th>Empleado</th>
+              <th>Período</th>
+              <th>Horas</th>
+              <th>Tarifa/hr</th>
+              <th>Bruto</th>
+              <th>Deducciones</th>
+              <th>Neto</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            {summaries.map((summary) => (
+              <tr key={summary.id}>
+                <td>{summary.firstName} {summary.lastName}</td>
+                <td>{new Date(summary.period).toLocaleDateString('es-DO')}</td>
+                <td>{summary.hoursWorked}h</td>
+                <td>{formatMoney(summary.hourlyRate)}</td>
+                <td className="font-semibold">{formatMoney(summary.grossSalary)}</td>
+                <td>{formatMoney(summary.deductions)}</td>
+                <td className="font-bold text-green-600">{formatMoney(summary.netSalary)}</td>
+                <td>
+                  <span className={`badge ${
+                    summary.status === 'PAID' ? 'badge-success' : 'badge-warning'
+                  }`}>
+                    {summary.status}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
-  const handleGenerate = async () => {
-    if (!periodStart || !periodEnd) {
-      alert('Seleccione fecha de inicio y fin');
-      return;
-    }
-    setGenerating(true);
-    try {
-      await api.post('/payroll/generate', { periodStart, periodEnd, periodType });
-      await fetchPayroll();
-    } catch (err: any) {
-      alert(err.response?.data?.error?.message || 'Error generando nomina');
-    } finally {
-      setGenerating(false);
-    }
-  };
-
-  const handleFinalize = async (id: number) => {
-    try {
-      await api.put(`/payroll/${id}/finalize`);
-      await fetchPayroll();
-    } catch (err: any) {
-      alert(err.response?.data?.error?.message || 'Error');
-    }
-  };
-
-  const handleRevert = async (id: number) => {
-    try {
-      await api.put(`/payroll/${id}/revert`);
-      await fetchPayroll();
-    } catch (err: any) {
-      alert(err.response?.data?.error?.message || 'Error');
-    }
-  };
-
-  const handleExportCsv = async () => {
-    setExportingCsv(true);
-    try {
-      const response = await api.get('/payroll/export/csv', {
-        params: getQueryFilters(),
-        responseType: 'blob',
-      });
-
-      const blob = new Blob([response.data], { type: 'text/csv;charset=utf-8;' });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      const startLabel = periodStart || 'all';
-      const endLabel = periodEnd || 'all';
-      link.href = url;
-      link.setAttribute('download', `payroll-${startLabel}-${endLabel}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
-    } catch (err: any) {
-      alert(err.response?.data?.error?.message || 'Error exportando CSV');
-    } finally {
-      setExportingCsv(false);
-    }
-  };
-
-  const handleExportPdf = async () => {
-    if (summaries.length === 0) {
-      alert('No hay registros para exportar');
-      return;
-    }
-
-    setExportingPdf(true);
-    try {
-      const doc = new jsPDF({ orientation: 'landscape' });
-      const startLabel = periodStart || 'all';
-      const endLabel = periodEnd || 'all';
-
-      doc.setFontSize(14);
-      doc.text('Reporte de Nomina - PonchEO', 14, 12);
-      doc.setFontSize(10);
-      doc.text(`Periodo: ${startLabel} a ${endLabel}`, 14, 18);
-
-      autoTable(doc, {
-        startY: 24,
-        head: [[
-          'Empleado',
-          'Depto.',
-          'Total Horas',
-          'Regular',
-          'Extras',
-          'Noche',
-          'Feriado',
-          'Bruto',
-          'Estado',
-        ]],
-        body: summaries.map((s) => [
-          `${s.employee?.firstName || ''} ${s.employee?.lastName || ''}`.trim(),
-          s.employee?.department?.name || '-',
-          formatHours(s.totalWorkedMinutes),
-          formatMoney(s.regularPay),
-          formatMoney(s.overtimePay),
-          formatMoney(s.nightPremiumPay),
-          formatMoney(s.holidayPay),
-          formatMoney(s.grossPay),
-          s.status,
-        ]),
-        styles: { fontSize: 8 },
-        headStyles: { fillColor: [37, 99, 235] },
-      });
-
-      doc.save(`payroll-${startLabel}-${endLabel}.pdf`);
-    } finally {
-      setExportingPdf(false);
-    }
-  };
-
-  const formatMoney = (val: string | number) => `RD$${Number(val).toFixed(2)}`;
-  const formatHours = (minutes: number) => `${Math.floor(minutes / 60)}h ${minutes % 60}m`;
-
-  if (loading) {
+      {summaries.length === 0 && (
+        <div className="alert">
+          <span>No hay registros de nómina</span>
+        </div>
+      )}
+    </div>
+  );
+}
     return <span className="loading loading-spinner loading-lg"></span>;
   }
 

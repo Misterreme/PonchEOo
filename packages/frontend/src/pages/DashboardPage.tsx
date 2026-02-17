@@ -1,35 +1,9 @@
-import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { getSupervisorDashboard, getEmployeeDashboard } from '../api/dashboard.api';
+import { mockDashboardSupervisor, mockDashboardEmployee } from '../data/mockData';
 
 export default function DashboardPage() {
   const { user, isSupervisor } = useAuth();
-  const [stats, setStats] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const data = isSupervisor
-          ? await getSupervisorDashboard()
-          : await getEmployeeDashboard();
-        setStats(data);
-      } catch (err) {
-        console.error('Failed to load dashboard:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchStats();
-  }, [isSupervisor]);
-
-  if (loading) {
-    return (
-      <div className="flex justify-center p-12">
-        <span className="loading loading-spinner loading-lg"></span>
-      </div>
-    );
-  }
+  const stats = isSupervisor ? mockDashboardSupervisor : mockDashboardEmployee;
 
   return (
     <div>

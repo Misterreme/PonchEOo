@@ -1,25 +1,8 @@
-import { useState, useEffect } from 'react';
-import api from '../api/client';
+import { useState } from 'react';
+import { mockHolidays } from '../data/mockData';
 
 export default function HolidaysPage() {
-  const [holidays, setHolidays] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetch = async () => {
-      try {
-        const { data } = await api.get('/holidays', { params: { year: 2026 } });
-        setHolidays(data.data);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetch();
-  }, []);
-
-  if (loading) return <span className="loading loading-spinner loading-lg"></span>;
+  const [holidays] = useState(mockHolidays);
 
   return (
     <div>

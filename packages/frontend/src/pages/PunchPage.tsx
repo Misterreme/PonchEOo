@@ -1,61 +1,31 @@
-import { useState, useEffect } from 'react';
-import { clockIn, clockOut, getPunches } from '../api/punches.api';
+import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { mockPunches } from '../data/mockData';
 
 export default function PunchPage() {
   const { user } = useAuth();
-  const [punches, setPunches] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [punches, setPunches] = useState(mockPunches);
   const [actionLoading, setActionLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-
-  const fetchPunches = async () => {
-    try {
-      const data = await getPunches({ employeeId: user!.id });
-      setPunches(data);
-    } catch (err) {
-      console.error('Failed to load punches:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchPunches();
-  }, []);
 
   const handleClockIn = async () => {
     setActionLoading(true);
     setMessage(null);
-    try {
-      await clockIn();
+    // Simulate API call
+    setTimeout(() => {
       setMessage({ type: 'success', text: 'Entrada registrada exitosamente' });
-      fetchPunches();
-    } catch (err: any) {
-      setMessage({
-        type: 'error',
-        text: err.response?.data?.error?.message || 'Error al registrar entrada',
-      });
-    } finally {
       setActionLoading(false);
-    }
+    }, 500);
   };
 
   const handleClockOut = async () => {
     setActionLoading(true);
     setMessage(null);
-    try {
-      await clockOut();
+    // Simulate API call
+    setTimeout(() => {
       setMessage({ type: 'success', text: 'Salida registrada exitosamente' });
-      fetchPunches();
-    } catch (err: any) {
-      setMessage({
-        type: 'error',
-        text: err.response?.data?.error?.message || 'Error al registrar salida',
-      });
-    } finally {
       setActionLoading(false);
-    }
+    }, 500);
   };
 
   const hasOpenPunch = punches.some((p) => p.status === 'OPEN');

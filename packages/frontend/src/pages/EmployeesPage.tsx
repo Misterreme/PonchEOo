@@ -1,9 +1,8 @@
-import { useState, useEffect } from 'react';
-import { getEmployees, createEmployee, deleteEmployee } from '../api/employees.api';
+import { useState } from 'react';
+import { mockEmployees } from '../data/mockData';
 
 export default function EmployeesPage() {
-  const [employees, setEmployees] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [employees, setEmployees] = useState(mockEmployees);
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({
     employeeCode: '',
@@ -16,54 +15,33 @@ export default function EmployeesPage() {
     hourlyRate: 200,
   });
 
-  const fetchEmployees = async () => {
-    try {
-      const data = await getEmployees(true);
-      setEmployees(data);
-    } catch (err) {
-      console.error('Failed to load employees:', err);
-    } finally {
-      setLoading(false);
-    }
+  const handleCreate = () => {
+    // Simulate API call
+    const newEmployee = {
+      id: employees.length + 1,
+      ...formData,
+      department: 'General',
+      status: 'ACTIVE',
+    };
+    setEmployees([...employees, newEmployee]);
+    setShowModal(false);
+    setFormData({
+      employeeCode: '',
+      firstName: '',
+      lastName: '',
+      email: '',
+      password: 'password123',
+      role: 'EMPLOYEE',
+      hireDate: new Date().toISOString().split('T')[0],
+      hourlyRate: 200,
+    });
   };
 
-  useEffect(() => {
-    fetchEmployees();
-  }, []);
-
-  const handleCreate = async () => {
-    try {
-      await createEmployee(formData);
-      setShowModal(false);
-      setFormData({
-        employeeCode: '',
-        firstName: '',
-        lastName: '',
-        email: '',
-        password: 'password123',
-        role: 'EMPLOYEE',
-        hireDate: new Date().toISOString().split('T')[0],
-        hourlyRate: 200,
-      });
-      fetchEmployees();
-    } catch (err: any) {
-      alert(err.response?.data?.error?.message || 'Error creating employee');
-    }
-  };
-
-  const handleDeactivate = async (id: number) => {
+  const handleDeactivate = (id: number) => {
     if (!confirm('Desactivar este empleado?')) return;
-    try {
-      await deleteEmployee(id);
-      fetchEmployees();
-    } catch (err: any) {
-      alert(err.response?.data?.error?.message || 'Error');
-    }
+    // Simulate API call
+    setEmployees(employees.filter((emp) => emp.id !== id));
   };
-
-  if (loading) {
-    return <span className="loading loading-spinner loading-lg"></span>;
-  }
 
   return (
     <div>

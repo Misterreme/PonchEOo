@@ -1,30 +1,8 @@
-import { useState, useEffect } from 'react';
-import api from '../api/client';
+import { useState } from 'react';
+import { mockShifts } from '../data/mockData';
 
 export default function ShiftsPage() {
-  const [templates, setTemplates] = useState<any[]>([]);
-  const [assignments, setAssignments] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetch = async () => {
-      try {
-        const [t, a] = await Promise.all([
-          api.get('/shift-templates'),
-          api.get('/shift-assignments'),
-        ]);
-        setTemplates(t.data.data);
-        setAssignments(a.data.data);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetch();
-  }, []);
-
-  if (loading) return <span className="loading loading-spinner loading-lg"></span>;
+  const [templates] = useState(mockShifts);
 
   return (
     <div>
