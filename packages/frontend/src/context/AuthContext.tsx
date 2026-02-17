@@ -32,7 +32,7 @@ const mockUser: User = {
 };
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const login = async (email: string, password: string) => {
+  const login = async (_email: string, _password: string) => {
     // No-op: auth removed
   };
 
