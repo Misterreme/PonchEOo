@@ -32,7 +32,7 @@ export function auditMiddleware(req: Request, res: Response, next: NextFunction)
             entityType,
             entityId,
             oldValues: req.originalEntityState ? (req.originalEntityState as any) : undefined,
-            newValues: extractDataPayload(data),
+            newValues: extractDataPayload(data) as any,
             ipAddress: req.ip || req.socket.remoteAddress,
           },
         })
