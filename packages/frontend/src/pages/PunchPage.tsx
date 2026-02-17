@@ -4,24 +4,22 @@ import { mockPunches } from '../data/mockData';
 
 export default function PunchPage() {
   const { user } = useAuth();
-  const [punches, setPunches] = useState(mockPunches);
+  const [punches] = useState(mockPunches);
   const [actionLoading, setActionLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
-  const handleClockIn = async () => {
+  const handleClockIn = () => {
     setActionLoading(true);
     setMessage(null);
-    // Simulate API call
     setTimeout(() => {
       setMessage({ type: 'success', text: 'Entrada registrada exitosamente' });
       setActionLoading(false);
     }, 500);
   };
 
-  const handleClockOut = async () => {
+  const handleClockOut = () => {
     setActionLoading(true);
     setMessage(null);
-    // Simulate API call
     setTimeout(() => {
       setMessage({ type: 'success', text: 'Salida registrada exitosamente' });
       setActionLoading(false);
@@ -50,7 +48,6 @@ export default function PunchPage() {
     <div>
       <h1 className="text-2xl font-bold mb-6">Ponchar</h1>
 
-      {/* Clock In / Clock Out Buttons */}
       <div className="flex gap-4 mb-6">
         <button
           onClick={handleClockIn}
@@ -74,69 +71,33 @@ export default function PunchPage() {
         </div>
       )}
 
-      {/* Punch History */}
       <h2 className="text-lg font-semibold mb-3">Historial de Ponches</h2>
-      {loading ? (
-        <span className="loading loading-spinner"></span>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="table table-zebra">
-            <thead>
-              <tr>
-                <th>Fecha</th>
-                <th>Entrada</th>
-                <th>Salida</th>
-                <th>Horas</th>
-                <th>Tardanza</th>
-                <th>Estado</th>
+      <div className="overflow-x-auto">
+        <table className="table table-zebra">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Entrada</th>
+              <th>Salida</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            {punches.map((punch) => (
+              <tr key={punch.id}>
+                <td>{formatDate(punch.date)}</td>
+                <td>{formatTime(punch.clockInTime)}</td>
+                <td>{formatTime(punch.clockOutTime)}</td>
+                <td>
+                  <span className={`badge ${punch.status === 'OPEN' ? 'badge-warning' : 'badge-success'}`}>
+                    {punch.status === 'OPEN' ? 'Abierto' : 'Cerrado'}
+                  </span>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {punches.map((punch) => (
-                <tr key={punch.id}>
-                  <td>{formatDate(punch.clockIn)}</td>
-                  <td>{formatTime(punch.clockIn)}</td>
-                  <td>{formatTime(punch.clockOut)}</td>
-                  <td>
-                    {punch.workedMinutes != null
-                      ? `${Math.floor(punch.workedMinutes / 60)}h ${punch.workedMinutes % 60}m`
-                      : '-'}
-                  </td>
-                  <td>
-                    {punch.tardinessMinutes > 0 ? (
-                      <span className="text-warning">{punch.tardinessMinutes} min</span>
-                    ) : (
-                      <span className="text-success">OK</span>
-                    )}
-                  </td>
-                  <td>
-                    <span
-                      className={`badge ${
-                        punch.status === 'OPEN'
-                          ? 'badge-warning'
-                          : punch.status === 'CLOSED'
-                            ? 'badge-success'
-                            : punch.status === 'AUTO_CLOSED'
-                              ? 'badge-info'
-                              : 'badge-secondary'
-                      }`}
-                    >
-                      {punch.status}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-              {punches.length === 0 && (
-                <tr>
-                  <td colSpan={6} className="text-center opacity-50">
-                    No hay ponches registrados
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      )}
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
