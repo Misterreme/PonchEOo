@@ -24,42 +24,27 @@ export default function DashboardPage() {
             <div className="stat-desc">Requieren aprobación</div>
           </div>
           <div className="stat bg-base-200 rounded-box p-4">
-            <div className="stat-title">Auto-Cerrados Hoy</div>
-            <div className="stat-value text-info">{stats?.autoClosedToday || 0}</div>
-            <div className="stat-desc">Cerrados automáticamente</div>
+            <div className="stat-title">Faltas Hoy</div>
+            <div className="stat-value text-info">{stats?.todayAbsences || 0}</div>
+            <div className="stat-desc">Empleados ausentes</div>
           </div>
           <div className="stat bg-base-200 rounded-box p-4">
-            <div className="stat-title">Empleados Activos</div>
-            <div className="stat-value">{stats?.activeEmployees || 0}</div>
-            <div className="stat-desc">En el sistema</div>
+            <div className="stat-title">Próximos Feriados</div>
+            <div className="stat-value">{stats?.upcomingHolidays || 0}</div>
+            <div className="stat-desc">Próximas 4 semanas</div>
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="stat bg-base-200 rounded-box p-4">
-            <div className="stat-title">Estado de Hoy</div>
-            <div className="stat-value text-lg">
-              {stats?.todayStatus === 'OPEN'
-                ? 'Fichado'
-                : stats?.todayStatus === 'CLOSED'
-                  ? 'Completado'
-                  : 'Sin Fichar'}
-            </div>
-            <div className="stat-desc">
-              {stats?.todayClockIn
-                ? `Entrada: ${new Date(stats.todayClockIn).toLocaleTimeString('es-DO')}`
-                : 'No has fichado hoy'}
-            </div>
+            <div className="stat-title">Horas Trabajadas Hoy</div>
+            <div className="stat-value">{stats?.hoursWorked || 0}h</div>
+            <div className="stat-desc">De 8h esperadas</div>
           </div>
           <div className="stat bg-base-200 rounded-box p-4">
             <div className="stat-title">Horas Esta Semana</div>
-            <div className="stat-value">{stats?.weekWorkedHours || 0}h</div>
-            <div className="stat-desc">De 44h semanales</div>
-          </div>
-          <div className="stat bg-base-200 rounded-box p-4">
-            <div className="stat-title">Correcciones Pendientes</div>
-            <div className="stat-value">{stats?.pendingCorrections || 0}</div>
-            <div className="stat-desc">En espera de aprobación</div>
+            <div className="stat-value">{stats?.totalHoursWeek || 0}h</div>
+            <div className="stat-desc">De 40h semanales</div>
           </div>
         </div>
       )}

@@ -3,7 +3,6 @@ import { useAuth } from '../context/AuthContext';
 import { mockPunches } from '../data/mockData';
 
 export default function PunchPage() {
-  const { user } = useAuth();
   const [punches] = useState(mockPunches);
   const [actionLoading, setActionLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);

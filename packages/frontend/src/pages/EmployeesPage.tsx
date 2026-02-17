@@ -79,15 +79,15 @@ export default function EmployeesPage() {
                     {emp.role}
                   </span>
                 </td>
-                <td>{emp.department?.name || '-'}</td>
+                <td>{emp.department || '-'}</td>
                 <td>RD${Number(emp.hourlyRate).toFixed(2)}</td>
                 <td>
-                  <span className={`badge ${emp.isActive ? 'badge-success' : 'badge-error'}`}>
-                    {emp.isActive ? 'Activo' : 'Inactivo'}
+                  <span className={`badge ${emp.status === 'ACTIVE' ? 'badge-success' : 'badge-error'}`}>
+                    {emp.status === 'ACTIVE' ? 'Activo' : 'Inactivo'}
                   </span>
                 </td>
                 <td>
-                  {emp.isActive && (
+                  {emp.status === 'ACTIVE' && (
                     <button
                       onClick={() => handleDeactivate(emp.id)}
                       className="btn btn-error btn-xs"

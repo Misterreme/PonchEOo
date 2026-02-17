@@ -29,7 +29,7 @@ export default function HolidaysPage() {
                   })}
                 </td>
                 <td>{h.name}</td>
-                <td>{h.isRecurring ? 'Si' : 'No'}</td>
+                <td>{h.type === 'NATIONAL' ? 'Si' : 'No'}</td>
               </tr>
             ))}
           </tbody>
